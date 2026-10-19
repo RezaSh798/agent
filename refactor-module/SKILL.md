@@ -38,9 +38,22 @@ This skill guides the AI coding agent to perform safe, maintainable, and pragmat
       */
      ```
 
-2. **Extract Method & SRP (Single Responsibility Principle):**
-   - Break down monolithic or overly long functions (> 25-30 lines) into focused, single-purpose helper functions.
-   - Keep internal helper functions focused on a single sub-task (e.g., validation, payload transformation, query construction).
+2. **SOLID Principles & Clean Modular Design:**
+   - **S - Single Responsibility Principle (SRP):**
+     - Break down monolithic or overly long functions (> 25-30 lines) into focused, single-purpose helper functions (Extract Method).
+     - Separate orthogonal concerns: isolate input validation, data parsing/normalization, business rules, and external communication into dedicated helpers.
+   - **O - Open/Closed Principle (OCP):**
+     - Design functions to be open for extension but closed for modification.
+     - Replace fragile, sprawling `switch` or `if/else` ladders with strategy objects, dictionary/handler lookups, or mapping tables when handling multiple types/strategies.
+   - **L - Liskov Substitution Principle (LSP):**
+     - Ensure polymorphic functions, class subclasses, or handler functions strictly honor the expectations and return contracts of the base types or default implementations.
+     - Never weaken preconditions or strengthen postconditions unexpectedly.
+   - **I - Interface Segregation Principle (ISP):**
+     - Avoid bloated parameter lists or forcing callers to provide unnecessary properties.
+     - Decompose large interfaces into small, cohesive contracts or flexible options objects.
+   - **D - Dependency Inversion Principle (DIP):**
+     - High-level business routines should not rigidly couple to low-level details.
+     - Favor dependency injection for external side-effects (e.g., accepting a logger, client, or config source via parameters/options with sensible defaults) rather than hardcoding tightly-coupled singletons inside business logic, enhancing testability.
 
 3. **Descriptive & Precise Naming:**
    - Rename cryptic, single-letter (e.g., `x`, `d`, `tmp`), or misleading variables and functions to convey clear business/domain intent.
@@ -97,6 +110,6 @@ This skill guides the AI coding agent to perform safe, maintainable, and pragmat
 2. **Plan Refactoring:** Identify candidates for method extraction, magic values, nested conditionals, error handling hygiene, and JSDoc additions.
 3. **Apply Changes:** Apply the refactored code cleanly to the file (or show the refactored code cleanly if dry-run mode is requested).
 4. **Report Summary:** Provide a brief, bulleted Changelog:
-   - **Methods Extracted:** List new helper functions created and their responsibilities.
-   - **Structural & Readability Improvements:** Detail guard clauses, constants extracted, async/await upgrades, and naming improvements.
+   - **SOLID & Modular Improvements:** Detail adherence to SOLID principles (e.g., SRP helper extraction, strategy/lookup tables for OCP, interface streamlining, dependency decoupling).
+   - **Structural & Readability Improvements:** Detail guard clauses, constants extracted, async/await upgrades, parameter objects, and naming improvements.
    - **Warnings & Observations:** Highlight any potential pre-existing bugs, edge cases, or follow-up recommendations observed during refactoring.
