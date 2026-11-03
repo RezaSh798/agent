@@ -88,7 +88,7 @@ ln -sf $(pwd)/commands/*.md ~/.config/kilo/command/
 ```bash
 # در ریشه پروژه مقصد
 mkdir -p .kilo/command
-cp /path/to/agent-skills/commands/*.md .kilo/command/
+cp /path/to/agent/commands/*.md .kilo/command/
 ```
 
 ---
@@ -130,10 +130,10 @@ ln -sfn $(pwd)/skills/refactor-module ~/.agents/skills/refactor-module
 ```bash
 # در ریشه پروژه مقصد
 mkdir -p .kilo/skills
-cp -r /path/to/agent-skills/skills/refactor-module .kilo/skills/
+cp -r /path/to/agent/skills/refactor-module .kilo/skills/
 ```
 
 #### ۳. نصب از طریق Skills CLI:
 ```bash
-npx skills add RezaSh798/skills@refactor-module -g
+npx skills add RezaSh798/agent@refactor-module -g
 ```
