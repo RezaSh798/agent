@@ -1,20 +1,14 @@
 ---
-name: spec-kit
-description: End-to-end Spec-Driven Development using GitHub Spec Kit (specify CLI). Interactively clarifies requirements and architecture with the user, and upon approval, uses the real installed Spec Kit tools to create specs, plans, and task breakdowns without manual command chaining.
-publish: true
-metadata:
-  author: kilo-assistant
-  version: "1.0.0"
+description: End-to-end Spec-Driven Development using GitHub Spec Kit (specify CLI) to clarify requirements and generate specs, plans, and task breakdowns.
 ---
 
-# GitHub Spec Kit (Spec-Driven Development) Skill
+# GitHub Spec Kit Command (`/spec-kit`)
 
-این مهارت به هوش مصنوعی (AI Coding Agent) آموزش می‌دهد تا فرایند کامل **Spec-Driven Development (SDD)** را با استفاده از ابزار رسمی **GitHub Spec Kit (`specify` CLI)** اجرا کند. هدف اصلی این مهارت حذف اصطکاک اجرای ترتیبی و دستی دستورات متعدد Spec Kit (`/speckit.specify`, `/speckit.clarify`, `/speckit.plan`, `/speckit.tasks`) است.
+اجرای فرایند کامل **Spec-Driven Development (SDD)** با استفاده از ابزار رسمی **GitHub Spec Kit (`specify` CLI)** جهت تبدیل ایده‌ها به مشخصات، پلن‌های معماری و تسک‌های اجرایی استاندارد، بدون نیاز به اجرای دستی و ترتیبی دستورات متوالی.
 
-با این مهارت:
-1. کاربر در یک گفت‌وگوی تعاملی ایده یا قابلیت مورد نظر خود را توضیح می‌دهد.
-2. ایجنت نیازمندی‌ها، ابهامات، اولویت‌ها و تصمیمات فنی را شفاف‌سازی می‌کند.
-3. پس از تأیید صریح کاربر، ایجنت با استفاده از **ابزار واقعی نصب‌شده GitHub Spec Kit** (نه شبیه‌سازی یا ساخت دستی)، فایل‌های استاندارد Spec Kit را تولید و تکمیل می‌کند.
+## آرگومان‌ها و نحوه اجرا (Arguments & Execution)
+- **آرگومان‌ها:** `$ARGUMENTS`: عنوان یا شرح اولیه ایده یا ویژگی مورد نظر کاربر (اختیاری).
+- در صورت ارسال `$ARGUMENTS`، بلافاصله آن را به عنوان ایده ورودی در نظر بگیرید و پیش‌نیازها و گام اول (شفاف‌سازی نیازمندی‌ها) را آغاز کنید. در صورت عدم ارسال آرگومان، از کاربر بخواهید ایده یا فیچر مورد نظرش را به زبان ساده بیان کند.
 
 ---
 

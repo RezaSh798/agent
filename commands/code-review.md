@@ -1,30 +1,18 @@
 ---
-name: code-review
-description: >-
-  Reviews the active branch against the base/target branch (develop for development, or master for stable release) focusing on Functionality,
-  Clean Code, and Clean Architecture. Generates an actionable, structured report formatted as a GitLab Merge Request
-  comment for developers to resolve issues before merging.
-publish: true
-metadata:
-  author: kilo-assistant
-  version: "1.0.0"
+description: Perform an automated code review on the active branch against base (develop/master) focusing on Functionality, Clean Architecture, and Clean Code, and output a Persian GitLab MR review report.
 ---
 
-# Code Review Skill (Functionality, Clean Code & Clean Architecture)
+# Code Review Command (`/code-review`)
 
-This skill guides the AI coding agent to perform an automated, in-depth code review on the active Git branch against its base/target branch. It evaluates **Functionality**, **Clean Architecture**, and **Clean Code**, and generates a structured, production-ready report in **Persian (فارسی)** intended to be posted directly as a **GitLab Merge Request comment**.
+Perform an automated, in-depth code review on the active Git branch against its base/target branch. Evaluate **Functionality**, **Clean Architecture**, and **Clean Code**, and generate a structured, production-ready report in **Persian (فارسی)** intended to be posted directly as a **GitLab Merge Request comment**.
+
+## Arguments & Execution
+- **Arguments:** `$ARGUMENTS` (or `$1`): Target base branch (optional, e.g. `develop`, `master`, `release/1.0`). If omitted, default to `develop` (or `origin/develop`), or `master` (or `origin/master`) for release/hotfix branches.
+- Parse `$ARGUMENTS` to determine the target base branch, immediately inspect the current branch changes against that base, and execute the review workflow below without asking unnecessary questions.
 
 ---
 
-## 1. Trigger Conditions
-Use this skill when:
-- The user asks to "review my code", "review current branch", "code review", or "بررسی کد".
-- The user requests an MR / PR review report to share with developers.
-- The user asks to evaluate code quality, clean architecture compliance, or functionality correctness of branch changes.
-
----
-
-## 2. Review Methodology & Inspection Workflow
+## 1. Review Methodology & Inspection Workflow
 
 ```mermaid
 flowchart TD
@@ -36,13 +24,15 @@ flowchart TD
     F --> G[Generate Formatted GitLab MR Comment Report]
 ```
 
-### Step 2.1: Determine Scope & Diff
+### Step 1.1: Determine Scope & Diff
 1. **Identify the current branch:**
    Run `git branch --show-current`.
 2. **Identify target base branch:**
-   - **`develop` (or `origin/develop`):** Default target for all feature, bugfix, and development branches.
-   - **`master` (or `origin/master`):** Stable/production branch (used for release/hotfix merges).
-   - *(Note: There is no `main` branch in this workflow).*
+   - Use `$ARGUMENTS` or `$1` if provided by the user.
+   - Otherwise, default to:
+     - **`develop` (or `origin/develop`):** Default target for all feature, bugfix, and development branches.
+     - **`master` (or `origin/master`):** Stable/production branch (used for release/hotfix merges).
+     - *(Note: There is no `main` branch in this workflow).*
    Determine the diff range against the target base (typically `origin/develop`):
    ```bash
    git diff --name-status origin/develop...HEAD
@@ -50,7 +40,7 @@ flowchart TD
 3. **Inspect the actual changes:**
    Read full changed files rather than just diff lines when understanding context, caller dependencies, and module structure is required.
 
-### Step 2.2: Scoping Rule — Strict Diff Focus (محدوده بررسی و تمرکز دقیق بر تغییرات MR)
+### Step 1.2: Scoping Rule — Strict Diff Focus (محدوده بررسی و تمرکز دقیق بر تغییرات MR)
 1. **فقط خطوط تغییریافته (Diff-Only Review):**
    نقدها، ایرادات و پیشنهادهای Clean Code باید **منحصراً** روی کدهای تغییریافته در این مرج‌ریکوئست (`git diff`) متمرکز باشند. **اکیداً ممنوع است** کدهای قدیمی و دست‌نخورده فایل که در این MR نقشی نداشته‌اند به عنوان ایراد، کامنت یا ترد ریویو مطرح شوند. این موارد در ریفکتورهای مجزا یا زمان توسعه همان بخش‌ها اصلاح می‌شوند و نباید روند مرج تسک فعلی را مسدود کنند.
 2. **ارجاع به بخش‌های بیرونی فقط به عنوان ریشه معماری (Context & Root Cause Only):**
@@ -58,7 +48,7 @@ flowchart TD
 
 ---
 
-## 3. The 3 Review Pillars
+## 2. The 3 Review Pillars
 
 ### Pillar 1: Functionality & Correctness (صحت عملکردی)
 Ensure the implementation performs exactly what it is designed to do without regressions, runtime exceptions, or logical flaws.
@@ -110,7 +100,7 @@ Ensure the code is maintainable, self-documenting, and aligned with engineering 
 
 ---
 
-## 4. Severity Classification
+## 3. Severity Classification
 
 Every identified issue must be labeled with one of the following levels:
 - 🔴 **[Critical / Blocker]**: Functional bugs, runtime exceptions, security holes, data loss risks, or major Clean Architecture layer violations that compromise the service. Must be resolved before merging.
@@ -120,7 +110,7 @@ Every identified issue must be labeled with one of the following levels:
 
 ---
 
-## 5. Output Format: GitLab Merge Request Report (قالب گزارش فارسی)
+## 4. Output Format: GitLab Merge Request Report (قالب گزارش فارسی)
 
 گزارش نهایی ریویو باید به **زبان فارسی**، ساختاریافته و با لحن مهندسی دقیق تولید شود تا توسعه‌دهنده بتواند مستقیماً آن را در کامنت Merge Request گیت‌لب قرار دهد. قالب استاندارد خروجی:
 
