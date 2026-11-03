@@ -1,46 +1,76 @@
 ---
-description: Perform an automated code review on the active branch against base (develop/master) focusing on Functionality, Clean Architecture, and Clean Code, and output a Persian GitLab MR review report.
+description: Perform an automated, localized code review on active branch changes against base, posting inline discussion threads to GitLab MR or generating copyable thread cards.
 ---
 
 # Code Review Command (`/code-review`)
 
-Perform an automated, in-depth code review on the active Git branch against its base/target branch. Evaluate **Functionality**, **Clean Architecture**, and **Clean Code**, and generate a structured, production-ready report in **Persian (فارسی)** intended to be posted directly as a **GitLab Merge Request comment**.
-
-## Arguments & Execution
-- **Arguments:** `$ARGUMENTS` (or `$1`): Target base branch (optional, e.g. `develop`, `master`, `release/1.0`). If omitted, default to `develop` (or `origin/develop`), or `master` (or `origin/master`) for release/hotfix branches.
-- Parse `$ARGUMENTS` to determine the target base branch, immediately inspect the current branch changes against that base, and execute the review workflow below without asking unnecessary questions.
+Perform an automated, in-depth code review on the active Git branch against its base/target branch. Focus on **Functionality**, **Clean Architecture**, and **Clean Code**. Instead of outputting a single monolithic review comment, pinpoint the exact lines of code that contain issues and generate **dedicated, actionable discussion threads** for each finding.
 
 ---
 
-## 1. Review Methodology & Inspection Workflow
+## آرگومان‌ها و دو حالت اجرا (Arguments & Execution Modes)
+
+### آرگومان‌ها (`$ARGUMENTS` یا `$1`):
+- **نام شاخه مبنا (اختیاری):** مانند `develop` یا `master`. در صورت عدم ذکر، پیش‌فرض `develop` (یا `origin/develop`)، و برای شاخه‌های hotfix/release معادل `master` (یا `origin/master`) خواهد بود.
+- **آدرس یا شناسه Merge Request گیت‌لب (اختیاری):** مانند `https://gitlab.example.com/group/project/-/merge_requests/42` یا `!42`.
+
+### دو حالت اجرا (Dual Execution Modes):
 
 ```mermaid
 flowchart TD
-    A[Detect Active Branch & Target Base] --> B[Collect Diff & Modified Files]
-    B --> C[Inspect Functionality & Business Logic]
-    B --> D[Evaluate Clean Architecture & Boundaries]
-    B --> E[Analyze Clean Code & Best Practices]
-    C & D & E --> F[Prioritize Issues by Severity]
-    F --> G[Generate Formatted GitLab MR Comment Report]
+    A[Start /code-review] --> B{آیا MR URL و توکن گیت‌لب موجود است؟}
+    B -- بله (دسترسی API) --> C[درج خودکار تردها در MR گیت‌لب از طریق API]
+    B -- خیر / عدم دسترسی --> D[ارائه کارت‌های مستقل ترد در چت جهت کپی-پیست دستی]
 ```
 
-### Step 1.1: Determine Scope & Diff
-1. **Identify the current branch:**
-   Run `git branch --show-current`.
-2. **Identify target base branch:**
-   - Use `$ARGUMENTS` or `$1` if provided by the user.
-   - Otherwise, default to:
-     - **`develop` (or `origin/develop`):** Default target for all feature, bugfix, and development branches.
-     - **`master` (or `origin/master`):** Stable/production branch (used for release/hotfix merges).
-     - *(Note: There is no `main` branch in this workflow).*
-   Determine the diff range against the target base (typically `origin/develop`):
-   ```bash
-   git diff --name-status origin/develop...HEAD
-   ```
-3. **Inspect the actual changes:**
-   Read full changed files rather than just diff lines when understanding context, caller dependencies, and module structure is required.
+1. **حالت اول: درج مستقیم تردها در گیت‌لب (Automated GitLab API Discussions):**
+   - **شرط فعال‌سازی:** کاربر آدرس/شناسه MR را ارائه داده باشد و متغیر محیطی توکن (`GITLAB_TOKEN` یا `GL_TOKEN`) یا نشست لاگین `glab` در دسترس باشد.
+   - **نحوه عملکرد:**
+     1. از طریق API یا `glab` اطلاعات MR و مشخصات Diff Refs (`base_sha`, `start_sha`, `head_sha`) را استخراج کنید:
+        ```bash
+        # نمونه فراخوانی جزئیات MR
+        curl --header "PRIVATE-TOKEN: $GITLAB_TOKEN" "$GITLAB_API_URL/projects/:id/merge_requests/:iid"
+        ```
+     2. برای هر ایراد یافت‌شده، یک ترد بحث مجزا (Discussion Thread) دقیقاً روی فایل و شماره خط تغییریافته با استفاده از GitLab Discussions API ایجاد کنید:
+        ```bash
+        curl --request POST \
+          --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+          --header "Content-Type: application/json" \
+          --data '{
+            "body": "<متن فارسی ترد شامل برچسب شدت، شرح مسئله و کد پیشنهادی>",
+            "position": {
+              "base_sha": "<base_sha>",
+              "start_sha": "<start_sha>",
+              "head_sha": "<head_sha>",
+              "position_type": "text",
+              "new_path": "path/to/file.js",
+              "new_line": 42
+            }
+          }' \
+          "$GITLAB_API_URL/projects/:id/merge_requests/:iid/discussions"
+        ```
+     3. یک یادداشت کلی (General MR Note) حاوی خلاصه بررسی و وضعیت نهایی (Verdict) در صفحه اصلی MR ثبت کنید.
+     4. گزارش وضعیت ثبت موفق تردها را به همراه لینک مستقیم به کاربر نمایش دهید.
 
-### Step 1.2: Scoping Rule — Strict Diff Focus (محدوده بررسی و تمرکز دقیق بر تغییرات MR)
+2. **حالت دوم: کارت‌های ترد مجزا جهت کپی-پیست دستی (Manual Copy-Paste Thread Cards):**
+   - **شرط فعال‌سازی:** در صورت عدم ارائه لینک MR یا نبود توکن دسترسی به گیت‌لب.
+   - **نحوه عملکرد:** به جای تولید یک متن یکپارچه، هر ایراد را به عنوان یک **کارت ترد مجزا (GitLab Discussion Card)** با کدبلاک و موقعیت مشخص در چت قرار دهید تا کاربر بتواند در تب **Changes** گیت‌لب، روی همان خط کلیک کرده و متن ترد را پیست کند.
+
+---
+
+## 1. متدولوژی بررسی و بازرسی کد
+
+```mermaid
+flowchart TD
+    A[شناسایی شاخه جاری و شاخه مقصد] --> B[استخراج Diff و فایل‌های تغییریافته]
+    B --> C[بررسی صحت عملکردی و باگ‌ها]
+    B --> D[بررسی مرزبندی و لایه‌های معماری تمیز]
+    B --> E[بررسی کد تمیز، خوانایی و نام‌گذاری]
+    C & D & E --> F[استخراج قطعه‌کدهای مشکل‌دار و شماره خطوط]
+    F --> G[تولید تردهای محلی به تفکیک خطوط کد]
+```
+
+### قانون حیاتی تمرکز بر Diff (محدوده دقیق بررسی):
 1. **فقط خطوط تغییریافته (Diff-Only Review):**
    نقدها، ایرادات و پیشنهادهای Clean Code باید **منحصراً** روی کدهای تغییریافته در این مرج‌ریکوئست (`git diff`) متمرکز باشند. **اکیداً ممنوع است** کدهای قدیمی و دست‌نخورده فایل که در این MR نقشی نداشته‌اند به عنوان ایراد، کامنت یا ترد ریویو مطرح شوند. این موارد در ریفکتورهای مجزا یا زمان توسعه همان بخش‌ها اصلاح می‌شوند و نباید روند مرج تسک فعلی را مسدود کنند.
 2. **ارجاع به بخش‌های بیرونی فقط به عنوان ریشه معماری (Context & Root Cause Only):**
@@ -48,133 +78,112 @@ flowchart TD
 
 ---
 
-## 2. The 3 Review Pillars
+## 2. ارکان سه‌گانه بررسی (The 3 Review Pillars)
 
 ### Pillar 1: Functionality & Correctness (صحت عملکردی)
-Ensure the implementation performs exactly what it is designed to do without regressions, runtime exceptions, or logical flaws.
-- **Business Logic & Edge Cases:**
-  - Are boundary conditions handled (`null`, `undefined`, empty collections, zero/negative values)?
-  - Are validation rules complete for all incoming data?
-- **Async & Concurrency Safety:**
-  - Are all asynchronous calls properly `await`ed?
-  - Are race conditions, unhandled Promise rejections, or missing distributed locks (e.g., Redis locks) present in critical concurrent sections?
-- **Error Handling & Resilience:**
-  - Are error types semantic? Do `try/catch` blocks re-throw or handle errors properly without swallowing stack traces?
-  - Are transaction rollbacks implemented for atomic operations (DB, external APIs)?
-- **Test Verification:**
-  - Are new features and bug fixes backed by automated unit or integration tests?
-  - Do existing tests still pass, and do tests cover negative paths and edge cases?
+- سناریوهای منطق کسب‌وکار، مقادیر مرزی (`null`, `undefined`, آرایه‌های خالی).
+- اعتبارسنجی ورودی‌ها و جلوگیری از استثناهای زمان اجرا.
+- ایمنی توابع ناهمگام (`await` کامل، عدم نشت Promiseهای مدیریت‌نشده، قفل‌های همزمانی).
+- مدیریت خطا، عدم بلعیدن خطا در `catch`، و رول‌بک تراکنش‌ها در تراکنش‌های ناموفق.
+- بررسی وجود تست‌های متناظر برای رفتارهای جدید.
 
-### Pillar 2: Clean Architecture & Modular Boundaries (معماری تمیز)
-Verify that architectural layer separations and dependency rules are strictly respected.
-- **Dependency Inversion & Inward Dependencies:**
-  - Dependencies must point inward toward business logic and domain entities.
-  - Core layers must not depend on outer infrastructure frameworks.
-- **Layer Separation:**
-  - **Presentation Layer (Controllers/Routes/CLI):** Should only parse requests, validate input schemas, delegate to Application/BL layer, and format responses. Must NOT contain direct DB queries or business rules.
-  - **Application / Business Logic Layer (`*Bl.js`, `*Service.js`):** Coordinates use cases and business rules. Must NOT leak transport objects (`req`, `res`, Express/Fastify context).
-  - **Domain Layer:** Pure business entities and domain models, decoupled from database drivers or external APIs.
-  - **Infrastructure Layer (`*Repository.js`, Adapters, Interfaces):** Implements data persistence, external service clients, message brokers.
-- **Boundary Leaks to Flag:**
-  - Direct database/ORM calls inside controllers.
-  - Transport-layer objects passed into services or repositories.
-  - Tight coupling between modules without dependency injection or interface abstraction.
+### Pillar 2: Clean Architecture & Boundaries (معماری تمیز)
+- **قانون جهت وابستگی‌ها:** وابستگی‌ها باید رو به داخل (به سمت Domain و Business Logic) باشند. لایه‌های درونی نباید به وب‌سرور یا جزئیات زیرساخت وابسته باشند.
+- **تفکیک مسئولیت لایه‌ها:**
+  - Controllers/Routes: صرفاً هدایت درخواست، اعتبارسنجی اسکیمای ورودی و فرمت خروجی (فاقد کوئری دیتابیس یا بیزینس رول).
+  - Business/Service: منطق خالص بیزینس (عدم نشت شیء `req` / `res`).
+  - Infrastructure/Repository: پیاده‌سازی کوئری‌ها، دیتابیس و ارتباطات شبکه.
+- **عدم نشت آبجکت‌های انتقال (Transport Leakage):** عدم ارسال شیء درخواست وب یا کانتکست فریم‌ورک به سرویس‌ها یا ریپازیتوری‌ها.
 
-### Pillar 3: Clean Code & Code Quality (کد تمیز و خوانایی)
-Ensure the code is maintainable, self-documenting, and aligned with engineering conventions.
-*(نکته حیاتی: تمامی بررسی‌های Clean Code صرفاً باید روی خطوط جدید یا ویرایش‌شده در این MR اعمال شوند و کدهای قدیمی دست‌نخورده فایل نباید کامنت شوند).*
-- **Naming & Readability:**
-  - Clear, intention-revealing names for variables, methods, and files.
-  - No cryptic abbreviations or misleading identifiers.
-- **Single Responsibility Principle (SRP):**
-  - Functions should do one thing well.
-  - Break down oversized functions (>30-40 lines) into small, focused helper methods.
-- **Cognitive Complexity & Guard Clauses:**
-  - Eliminate deep nested `if/else` structures using early returns / guard clauses.
-- **DRY & KISS:**
-  - Remove duplicated logic.
-  - Avoid premature optimization and unnecessary abstraction layers.
-- **Hygiene & Standards:**
-  - No commented-out dead code, debugging `console.log`s, or unused imports.
-  - Proper formatting and linting compliance.
+### Pillar 3: Clean Code & Readability (کد تمیز و خوانایی)
+*(فقط روی کدهای جدید یا تغییریافته)*
+- نام‌گذاری گویا و هدفمند متغیرها و متدها.
+- پایبندی به اصل تک‌مسئولیتی (SRP) و شکستن متدهای طولانی به هلپرهای مجزا.
+- استفاده از Guard Clauses و Early Returns برای حذف شرط‌های تودرتو.
+- رعایت DRY و KISS و حذف کدهای تکراری.
+- پاکیزگی کد (حذف کامنت‌های مرده، `console.log`های دیباگ و ایمپورتهای استفاده‌نشده).
 
 ---
 
-## 3. Severity Classification
+## 3. دسته‌بندی و اولویت‌بندی ایرادات (Severity)
 
-Every identified issue must be labeled with one of the following levels:
-- 🔴 **[Critical / Blocker]**: Functional bugs, runtime exceptions, security holes, data loss risks, or major Clean Architecture layer violations that compromise the service. Must be resolved before merging.
-- 🟡 **[Major]**: Unhandled edge cases, lack of test coverage for core logic, transport leaks into services, high cognitive complexity.
-- 🔵 **[Minor / Clean Code]**: Naming improvements, code duplication (DRY), missing documentation/comments for complex logic, unused variables.
-- 💡 **[Suggestion / Optimization]**: Performance optimizations, modern language idioms, minor refactoring recommendations.
+هر ترد باید دقیقاً با یکی از برچسب‌های شدت زیر شروع شود:
+- 🔴 **[Critical / Blocker]**: باگ‌های عملکردی، خطاهای زمان اجرا، رخنه‌های امنیتی، یا نقض‌های شدید معماری تمیز که پایداری سرویس را تهدید می‌کنند.
+- 🟡 **[Major]**: عدم پوشش حالت‌های مرزی، نشت لایه‌ای (Transport Leak)، پیچیدگی شناختی بالا یا فقدان تست منطق حساس.
+- 🔵 **[Minor / Clean Code]**: نام‌گذاری نامناسب، نقض DRY، توابع بیش از حد بلند، عدم استفاده از Guard Clause.
+- 💡 **[Suggestion / Optimization]**: پیشنهادهای بهینه‌سازی کارایی، الگوهای مدرن زبان و ارتقای خوانایی.
 
 ---
 
-## 4. Output Format: GitLab Merge Request Report (قالب گزارش فارسی)
+## 4. ساختار استاندارد تردهای بحث (GitLab Discussion Thread Template)
 
-گزارش نهایی ریویو باید به **زبان فارسی**، ساختاریافته و با لحن مهندسی دقیق تولید شود تا توسعه‌دهنده بتواند مستقیماً آن را در کامنت Merge Request گیت‌لب قرار دهد. قالب استاندارد خروجی:
+هر ترد باید مختصر، دقیق و حاوی اصلاحیه ملموس باشد:
 
 ```markdown
-# 📋 گزارش بررسی کد (Merge Request Code Review Report)
+**[🔴 بحرانی / 🟡 مهم / 🔵 کد تمیز / 💡 پیشنهاد] <عنوان کوتاه و واضح ایراد>**
 
-### 📌 مشخصات بررسی
-- **شاخه مبدأ (Source Branch):** `<active-branch>`
-- **شاخه مقصد (Target Branch):** `<base-branch>`
-- **فایل‌های تغییریافته:** `<count> فایل` (`+<added_lines>` / `-<removed_lines>`)
-- **خلاصه تغییرات:** <خلاصه کوتاه و فنی از تغییرات و ارزیابی کیفی کلی>
-
----
-
-### 🏛️ ارزیابی معماری و مرزبندی لایه‌ها (Clean Architecture)
-- **تفکیک لایه‌ها (Layer Separation):** [✅ رعایت شده (Compliant) | ⚠️ دارای نقص (Violations Found)]
-- **جریان وابستگی (Dependency Flow):** [✅ وابستگی رو به داخل (Inward) | ⚠️ نشتی به بیرون (Leaking Outward)]
-- **توضیحات:** <شرح مختصر از نحوه قرارگیری کدهای جدید در معماری سرویس>
-
----
-
-### 🚨 یافته‌ها و اقدامات اصلاحی (Findings & Actionable Fixes)
-
-#### 🔴 ایرادات بحرانی (Blockers)
-> *پیش از تایید و مرج باید رفع شوند.*
-
-- **[صحت عملکردی | معماری تمیز] <عنوان ایراد>**
-  - **محل:** `path/to/file.ext:LINE`
-  - **شرح مشکل:** <توضیح شفاف باگ، ریسک یا نقص معماری>
-  - **اقدام اصلاحی:**
-  ```javascript
-  // ❌ کد مشکل‌دار:
-  ...
-  // ✅ کد پیشنهادی:
-  ...
-  ```
-
-#### 🟡 ایرادات با اولویت بالا (Major Issues)
-> *نشتی معماری، مدیریت ناقص حالت‌های مرزی یا عدم پوشش تست.*
-
-- **[دسته‌بندی] <عنوان ایراد>**
-  - **محل:** `path/to/file.ext:LINE`
-  - **شرح مشکل:** <توضیح مشکل>
-  - **اقدام اصلاحی:** <راه‌حل پیشنهادی یا ریفکتور>
-
-#### 🔵 بهبودهای کد تمیز (Clean Code & Readability)
-> *خوانایی، نام‌گذاری، DRY و نگه‌داری‌پذیری.*
-
-- `path/to/file.ext:LINE`: <نکته و پیشنهاد بهبود>
-
----
-
-### 🧪 چک‌لیست صحت عملکرد و تست‌ها
-- [ ] سناریوهای اصلی بیزینس بررسی و تایید شدند
-- [ ] حالت‌های مرزی (null/خالی/خطاها) به درستی مدیریت شدند
-- [ ] صحت async/await و تراکنش‌ها تضمین شد
-- [ ] تست‌های خودکار برای منطق جدید اضافه یا به‌روزرسانی شدند
-- [ ] مرزهای لایه‌های معماری تمیز حفظ شدند
-
----
-
-### 🏁 نتیجه و پیشنهاد نهایی (Verdict)
-- **وضعیت:** `REQUEST_CHANGES` | `APPROVED_WITH_COMMENTS` | `APPROVED`
-- **گام‌های بعدی برای توسعه‌دهنده:**
-  1. <اقدام مشخص>
-  2. <اقدام مشخص>
+- **شرح مسئله:** <توضیح کوتاه و فنی از مشکل یا ریسک در این خط کد>
+- **اصلاحیه پیشنهادی:**
+```javascript
+// ❌ کد فعلی:
+...
+// ✅ کد پیشنهادی:
+...
 ```
+```
+
+---
+
+## 5. قالب خروجی نهایی در چت (Output Format)
+
+اگر تردها مستقیماً از طریق API در گیت‌لب ثبت شدند، گزارش ثبت را به همراه لینک مستقیم ارائه دهید.
+در غیر این صورت (حالت کپی-پیست)، خروجی باید به صورت زیر تولید شود:
+
+### ۱. خلاصه ارزیابی و وضعیت کلی (Overview Summary)
+```markdown
+## 📋 خلاصه بررسی کد (Code Review Summary)
+- **شاخه مبدأ:** `<source-branch>` ➔ **شاخه مقصد:** `<target-branch>`
+- **فایل‌های بررسی‌شده:** `<count>` فایل
+- **آمار یافته‌ها:** 🔴 `<count>` بحرانی | 🟡 `<count>` مهم | 🔵 `<count>` کد تمیز | 💡 `<count>` پیشنهاد
+- **ارزیابی معماری:** [✅ رعایت کامل | ⚠️ دارای نقص در تفکیک لایه‌ها]
+- **نتیجه نهایی:** `REQUEST_CHANGES` | `APPROVED_WITH_COMMENTS` | `APPROVED`
+```
+
+### ۲. تردهای خطی مجزا برای کپی در گیت‌لب (Copyable Discussion Cards)
+
+برای هر ایراد، یک کارت مجزا شامل مسیر فایل، شماره خط و قطعه کد را به همراه متن آماده پیست نمایش دهید:
+
+```markdown
+---
+
+### 🧵 ترد ۱: `src/services/orderService.js` (خط ۴۸)
+
+**کد مربوطه:**
+```javascript
+const order = await this.repo.findById(orderId);
+if (order.status === 'PAID') { ... }
+```
+
+**متن ترد (جهت درج کامنت روی خط ۴۸ در تب Changes):**
+```markdown
+**[🔴 بحرانی] عدم بررسی مقادیر null برای اردر یافت‌نشده**
+
+- **شرح مسئله:** در صورتی که شناسه وارد شده در دیتابیس یافت نشود، متغیر `order` برابر `null` خواهد بود و ارجاع به `order.status` منجر به پرتاب خطای زمان اجرای `TypeError: Cannot read properties of null` می‌شود.
+- **اصلاحیه پیشنهادی:**
+```javascript
+// ❌ کد فعلی:
+const order = await this.repo.findById(orderId);
+if (order.status === 'PAID') { ... }
+
+// ✅ کد پیشنهادی:
+const order = await this.repo.findById(orderId);
+if (!order) {
+  throw new NotFoundException(`سفارش با شناسه ${orderId} یافت نشد.`);
+}
+if (order.status === 'PAID') { ... }
+```
+```
+
+---
+```
+*(به همین ترتیب برای سایر تردهای شناسایی‌شده ادامه می‌یابد).*
