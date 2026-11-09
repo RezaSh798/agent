@@ -1,14 +1,15 @@
 ---
+name: prompt-architect
 description: Turn rough task ideas and descriptions into clear, structured, agent-ready prompts.
 ---
 
-# Prompt Architect Command (`/prompt-architect`)
+# Prompt Architect Skill (`/prompt-architect`)
 
 Turn rough task descriptions into clear, structured, agent-ready prompts for AI agents.
 
 ## Arguments & Execution
-- **Arguments:** `$ARGUMENTS`: The user's rough task description or prompt idea.
-- If `$ARGUMENTS` is provided, immediately analyze the task and begin the workflow. If no arguments are passed, prompt the user in Persian to share the task or idea they want structured.
+- **Arguments / Input:** The user's rough task description or prompt idea (provided via slash command arguments or chat message).
+- If input is provided, immediately analyze the task and begin the workflow. If no arguments are passed, prompt the user in Persian to share the task or idea they want structured.
 
 ## General Behavior
 - The user provides a rough description of a task they want an AI agent to perform. The description may be in Persian or English.

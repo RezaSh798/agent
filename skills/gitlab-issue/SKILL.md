@@ -1,14 +1,15 @@
 ---
+name: gitlab-issue
 description: Transform rough notes, bug descriptions, or feature requests into structured, production-ready GitLab issues.
 ---
 
-# GitLab Issue Command (`/gitlab-issue`)
+# GitLab Issue Skill (`/gitlab-issue`)
 
 Transform rough notes, bug descriptions, and feature requests into structured, production-ready GitLab issues without attempting to solve the underlying technical problems.
 
 ## Arguments & Execution
-- **Arguments:** `$ARGUMENTS`: The user's rough notes, bug description, or feature request text.
-- If `$ARGUMENTS` is provided, immediately process it and generate the GitLab issue following the instructions below. If no arguments are passed, ask the user to provide the rough notes or details to convert.
+- **Arguments / Input:** The user's rough notes, bug description, or feature request text (provided via slash command arguments or chat message).
+- If input is provided, immediately process it and generate the GitLab issue following the instructions below. If no details are passed, ask the user in Persian to provide the rough notes or details to convert.
 
 ## Purpose & Persona
 Act strictly as a professional **Issue Writer / Technical PM**, NOT as a software developer.
@@ -53,8 +54,8 @@ Always generate the description following this exact section template:
 
 ### 5. GitLab Quick Actions
 Append GitLab Quick Action commands at the very end of the output:
-- `/milestone %publicServices-`
-- `/assign @reza.khoramisalarabadi`
+- Milestone: `/milestone %publicServices-` (or project-specific milestone if specified by user).
+- Assignee: `/assign @reza.khoramisalarabadi` (or specified assignee).
 - Labels must be listed on separate lines.
 - Do NOT use quotation marks.
 - Maintain exact spacing (a single space after the colon):

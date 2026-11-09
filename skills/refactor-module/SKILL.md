@@ -3,8 +3,8 @@ name: refactor-module
 description: Pragmatic, safe, and maintainable refactoring for Node.js modules without introducing breaking changes or over-engineering.
 publish: true
 metadata:
-  author: kilo-assistant
-  version: "1.0.0"
+  author: RezaSh798
+  version: "1.1.0"
 ---
 
 # Pragmatic Node.js Module Refactoring Skill

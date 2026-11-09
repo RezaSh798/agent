@@ -1,8 +1,9 @@
 ---
+name: code-review
 description: Perform an automated, localized code review on active branch changes against base, posting inline discussion threads to GitLab MR or generating copyable thread cards.
 ---
 
-# Code Review Command (`/code-review`)
+# Code Review Skill (`/code-review`)
 
 Perform an automated, in-depth code review on the active Git branch against its base/target branch. Focus on **Functionality**, **Clean Architecture**, and **Clean Code**. Instead of outputting a single monolithic review comment, pinpoint the exact lines of code that contain issues and generate **dedicated, actionable discussion threads** for each finding.
 
@@ -10,7 +11,7 @@ Perform an automated, in-depth code review on the active Git branch against its 
 
 ## آرگومان‌ها و دو حالت اجرا (Arguments & Execution Modes)
 
-### آرگومان‌ها (`$ARGUMENTS` یا `$1`):
+### آرگومان‌ها (`$ARGUMENTS` یا ورودی کاربر):
 - **نام شاخه مبنا (اختیاری):** مانند `develop` یا `master`. در صورت عدم ذکر، پیش‌فرض `develop` (یا `origin/develop`)، و برای شاخه‌های hotfix/release معادل `master` (یا `origin/master`) خواهد بود.
 - **آدرس یا شناسه Merge Request گیت‌لب (اختیاری):** مانند `https://gitlab.example.com/group/project/-/merge_requests/42` یا `!42`.
 
