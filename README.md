@@ -19,6 +19,8 @@ skills/
 │   └── SKILL.md
 ├── gitlab-issue/
 │   └── SKILL.md
+├── gitlab-report/
+│   └── SKILL.md
 ├── prompt-architect/
 │   └── SKILL.md
 ├── refactor-module/
@@ -61,6 +63,19 @@ skills/
   - عنوان انگلیسی استاندارد با افعال قراردادی (`Fix...`, `Add...`, `Improve...`).
   - بدنه ساختاریافته به فارسی نیمه‌رسمی (شامل بخش‌های: خلاصه، وضعیت فعلی، انتظار ما، پیشنهاد مسیرهای بررسی، و نکات).
   - دستورات سریع گیت‌لب (GitLab Quick Actions) شامل مایلستون، اساین و برچسب‌های تفکیک‌شده در یک کدبلاک منسجم و آماده کپی.
+
+---
+
+### 📊 [`gitlab-report`](./skills/gitlab-report/SKILL.md)
+تولید گزارش‌های ساختاریافته، دقیق و مهندسی برای کامنت‌های گیت‌لب (Merge Requestها یا Issueها) شامل تحلیل مشکلات، تغییرات فنی، چالش‌ها و بازنگری‌های حین توسعه (Debugging Iterations) و ثبت خودکار تایم `/spend`.
+
+- **اسلش‌کامند:** `/gitlab-report`
+- **ورودی‌ها:** کانتکست مکالمه جاری، وضعیت گیت یا شرح کلی کارهای انجام‌شده.
+- **ویژگی‌ها:**
+  - بدنه کاملاً تفکیک‌شده و انسان‌فهم به زبان فارسی فنی، روان و پرهیز از زیاده‌گویی.
+  - تفکیک شفاف چالش‌ها و تغییرات به ازای هر ماژول یا سناریوی فنی.
+  - ثبت دقیق فراز و فرودها، باگ‌های پنهان کشف‌شده و مسیرهای عیب‌یابی (جهت توجیه واقعی زمان صرف‌شده).
+  - محاسبه و درج خودکار دستور سریع گیت‌لب (`/spend <duration>`).
 
 ---
 
@@ -156,6 +171,7 @@ ln -sfn /path/to/agent/skills/* ~/.agents/skills/
 npx skills add RezaSh798/agent@refactor-module -g
 npx skills add RezaSh798/agent@code-review -g
 npx skills add RezaSh798/agent@gitlab-issue -g
+npx skills add RezaSh798/agent@gitlab-report -g
 npx skills add RezaSh798/agent@prompt-architect -g
 npx skills add RezaSh798/agent@spec-kit -g
 npx skills add RezaSh798/agent@spec-runner -g
